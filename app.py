@@ -1,46 +1,73 @@
 import streamlit as st
 import pandas as pd
 import duckdb
+import io
 
-st.write("""
-# SQL SRS
-Spaced Repetition System SQL practice
-""")
+csv = """
+beverage,price
+orange juice,2.5
+Expresso,2
+Tea,3
+"""
+beverages = pd.read_csv(io.StringIO(csv))
+#con.execute("CREATE TABLE IF NOT EXISTS beverages AS SELECT * FROM beverages")
 
+csv2 = """
+food_item,food_price
+cookie juice,2.5
+chocolatine,2
+muffin,3
+"""
+food_items = pd.read_csv(io.StringIO(csv2))
+#con.execute("CREATE TABLE IF NOT EXISTS food_items AS SELECT * FROM food_items")
 
-option = st.selectbox(
-    "What do like to review ?",
-    ("Joins", "GroupBy", "Windows Functions"),
-    index=None,
-    placeholder="Select a theme ...",
-)
+answer = """
+SELECT * FROM beverages
+CROSS JOIN food_items
+"""
 
-st.write('You selected : ', option)
+solution = duckdb.sql(answer).df()
+
+st.write("\n"
+         "# SQL SRS\n"
+         "Spaced Repetition System SQL practice\n")
+
+with st.sidebar:
+    option = st.selectbox(
+        "What do like to review ?",
+        ("Joins", "GroupBy", "Windows Functions"),
+        index=None,
+        placeholder="Select a theme ...",
+    )
+
+    st.write('You selected : ', option)
 
 data = {"a" : [1, 2, 3], "b" : [4, 5, 6]}
 df = pd.DataFrame(data)
 
-tab1, tab2, tab3 = st.tabs(["cat", "dog", "owl"])
+# Création d'une relation DuckDB à partir du DataFrame
+relation = duckdb.from_df(df)
+sql_query = st.text_area(label="Entrez votre code ici :")
+if sql_query.strip():  # Ensure the query is not empty
+    try:
+        result = relation.query("data", sql_query).df()
+        st.write(f"Vous avez entré la query suivante : {sql_query}")
+        st.dataframe(result)
+    except Exception as e:
+        st.write("Error executing query: ", e)
+else:
+    st.write("Please enter a valid SQL query.")
 
-with tab1:
-    # Création d'une relation DuckDB à partir du DataFrame
-    relation = duckdb.from_df(df)
-    sql_query = st.text_area(label="Entrez votre code ici :")
-    if sql_query.strip():  # Ensure the query is not empty
-        try:
-            result = relation.query("data", sql_query).df()
-            st.write(f"Vous avez entré la query suivante : {sql_query}")
-            st.dataframe(result)
-        except Exception as e:
-            st.write("Error executing query: ", e)
-    else:
-        st.write("Please enter a valid SQL query.")
 
+tab2, tab3 = st.tabs(["Tables", "Solution"])
 
 with tab2:
-    st.header("a dog")
-    st.image("https://static.streamlit.io/examples/dog.jpg", width=200)
+    st.write("table : beverages")
+    st.dataframe(beverages)
+    st.write("table : food_items")
+    st.dataframe(food_items)
+    st.write("Résultat attendu : ")
+    st.dataframe(solution)
 
 with tab3:
-    st.header("a owl")
-    st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
+    st.write(answer)
