@@ -1,37 +1,43 @@
-import streamlit as st
-import pandas as pd
-import duckdb
+"""
+# docsting :
+Code utilisé pour développer l'app SQL_SRS
+"""
+
 import io
 
+import duckdb
+import pandas as pd
+import streamlit as st
+
 # création du df beverages
-csv = """
+CSV = """
 beverage,price
 orange juice,2.5
 Expresso,2
 Tea,3
 """
-beverages = pd.read_csv(io.StringIO(csv))
+beverages = pd.read_csv(io.StringIO(CSV))
 # con.execute("CREATE TABLE IF NOT EXISTS beverages AS SELECT * FROM beverages")
 
 # création du df food_items
-csv2 = """
+CSV2 = """
 food_item,food_price
 cookie juice,2.5
 chocolatine,2
 muffin,3
 """
-food_items = pd.read_csv(io.StringIO(csv2))
+food_items = pd.read_csv(io.StringIO(CSV2))
 # con.execute("CREATE TABLE IF NOT EXISTS food_items AS SELECT * FROM food_items")
 
 # correction
-answer_str = """
+ANSWER_STR = """
 SELECT * FROM beverages
 CROSS JOIN food_items
 """
 
-solution_df = duckdb.sql(answer_str).df()
+solution_df = duckdb.sql(ANSWER_STR).df()
 
-st.write("\n" "# SQL SRS\n" "Spaced Repetition System SQL practice\n")
+st.markdown("\n" "# SQL SRS\n" "Spaced Repetition System SQL practice\n")
 
 with st.sidebar:
     option = st.selectbox(
@@ -107,4 +113,4 @@ with tab2:
     st.dataframe(solution_df)
 
 with tab3:
-    st.write(answer_str)
+    st.write(ANSWER_STR)
