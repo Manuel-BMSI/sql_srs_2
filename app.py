@@ -4,6 +4,7 @@ Code utilisé pour développer l'app SQL_SRS
 """
 
 import io
+import ast
 
 import duckdb
 import pandas as pd
@@ -30,14 +31,14 @@ with st.sidebar:
     )
     st.write("Votre sélection : ", theme)
 
-    exerecice = con.execute(f"SELECT * FROM memory_state WHERE theme = '{theme}'").df()
-    st.write(exerecice)
-data = {"a": [1, 2, 3], "b": [4, 5, 6]}
-df = pd.DataFrame(data)
-
-# Création d'une relation DuckDB à partir du DataFrame
-relation = duckdb.from_df(df)
-sql_query = st.text_area(label="Entrez votre code ici :", key="user_input")
+    exo = con.execute(f"SELECT * FROM memory_state WHERE theme = '{theme}'").df()
+    st.write(exo)
+# data = {"a": [1, 2, 3], "b": [4, 5, 6]}
+#df = pd.DataFrame(data)
+#
+# # Création d'une relation DuckDB à partir du DataFrame
+# relation = duckdb.from_df(df)
+# sql_query = st.text_area(label="Entrez votre code ici :", key="user_input")
 # if sql_query.strip():  # Ensure the query is not empty
 #     try:
 #         result = relation.query("data", sql_query).df()
@@ -85,13 +86,14 @@ sql_query = st.text_area(label="Entrez votre code ici :", key="user_input")
 # else:
 #     st.write("Veuillez entre votre code SQL ci-dessus.")
 #
-# tab2, tab3 = st.tabs(["Tables", "Solution"])
-#
-# with tab2:
-#     st.write("table : beverages")
-#     st.dataframe(beverages)
-#     st.write("table : food_items")
-#     st.dataframe(food_items)
+tab2, tab3 = st.tabs(["Tables", "Solution"])
+
+with tab2:
+    exo_tables = ast.literal_eval(exo.loc[0, "tables"])
+    for table in exo_tables:
+        st.write(f"Table : {table}")
+        df_table = con.execute(f"SELECT * FROM {table}").df()
+        st.dataframe(df_table)
 #     st.write("Résultat attendu : ")
 #     st.dataframe(solution_df)
 #
