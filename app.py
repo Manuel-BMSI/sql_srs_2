@@ -33,13 +33,14 @@ with st.sidebar:
 
     exo = con.execute(f"SELECT * FROM memory_state WHERE theme = '{theme}'").df()
     st.write(exo)
-# data = {"a": [1, 2, 3], "b": [4, 5, 6]}
-#df = pd.DataFrame(data)
-#
+
 # # Création d'une relation DuckDB à partir du DataFrame
-# relation = duckdb.from_df(df)
-# sql_query = st.text_area(label="Entrez votre code ici :", key="user_input")
-# if sql_query.strip():  # Ensure the query is not empty
+
+st.header("Entrez votre code :")
+sql_query = st.text_area(label="Entrez votre code ici :", key="user_input")
+if sql_query.strip():  # Ensure the query is not empty
+    result = con.execute(sql_query).df()
+    st.dataframe(result)
 #     try:
 #         result = relation.query("data", sql_query).df()
 #         st.markdown(
@@ -89,7 +90,8 @@ with st.sidebar:
 tab2, tab3 = st.tabs(["Tables", "Solution"])
 
 with tab2:
-    exo_tables = ast.literal_eval(exo.loc[0, "tables"])
+    #exo_tables = ast.literal_eval(exo.loc[0, "tables"])
+    exo_tables = exo.loc[0, "tables"]
     for table in exo_tables:
         st.write(f"Table : {table}")
         df_table = con.execute(f"SELECT * FROM {table}").df()
@@ -97,5 +99,8 @@ with tab2:
 #     st.write("Résultat attendu : ")
 #     st.dataframe(solution_df)
 #
-# with tab3:
-#     st.write(ANSWER_STR)
+with tab3:
+    exo_name = exo.loc[0, "exo_name"]
+    with open(f"answers/{exo_name}.sql", "r") as f:
+        answer = f.read()
+    st.write(answer)
