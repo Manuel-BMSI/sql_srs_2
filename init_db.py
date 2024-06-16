@@ -10,7 +10,7 @@ con = duckdb.connect(database="data/exercices_sql_tables.duckdb", read_only=Fals
 # --------------------------------------------------------------------------------
 
 data = {
-    "theme": ["Joins", "Windows Functions"],
+    "theme": ["Joins", "Joins"],
     "exo_name": ["beverages_and_food", "sizes_and_trademarks"],
     "tables": [["beverages", "food_items"], ["sizes", "trademarks"]],
     "last_reviewed": ["2000-01-01", "1970-01-01"],
@@ -42,3 +42,28 @@ muffin,3
 """
 food_items = pd.read_csv(io.StringIO(CSV2))
 con.execute("CREATE TABLE IF NOT EXISTS food_items AS SELECT * FROM food_items")
+
+
+# création du df sizes
+sizes = """
+size
+XS
+M
+L
+XL
+"""
+sizes = pd.read_csv(io.StringIO(sizes))
+con.execute("CREATE TABLE IF NOT EXISTS sizes AS SELECT * FROM sizes")
+
+# création du df trademarks
+trademarks = """
+trademark
+Nike
+Asphalte
+Abercrombie
+Lewis
+"""
+trademarks = pd.read_csv(io.StringIO(trademarks))
+con.execute("CREATE TABLE IF NOT EXISTS trademarks AS SELECT * FROM trademarks")
+
+con.close()

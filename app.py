@@ -4,11 +4,20 @@ Code utilisé pour développer l'app SQL_SRS
 """
 
 import io
-import ast
-
+import logging
+import os
 import duckdb
 import pandas as pd
 import streamlit as st
+
+if "data" not in os.listdir():
+    logging.error(os.listdir())
+    logging.error("creating folder data")
+    os.mkdir("data")
+
+if "exercices_sql_tables.duckdb" not in os.listdir("data"):
+    exec(open("init_db.py").read()) # pylint disabled
+    # subprocess.run(["python", "init_db.py"])
 
 con = duckdb.connect(database="data/exercices_sql_tables.duckdb", read_only=False)
 
@@ -21,17 +30,26 @@ con = duckdb.connect(database="data/exercices_sql_tables.duckdb", read_only=Fals
 st.markdown("\n" "# SQL SRS\n" "Spaced Repetition System SQL practice\n")
 
 with st.sidebar:
+    themes_disponibles_df = con.execute("SELECT DISTINCT theme FROM memory_state").df()
     theme = st.selectbox(
         "What do like to review ?",
-        ("Joins", "GroupBy", "Windows Functions"),
+        themes_disponibles_df["theme"].unique(),
         index=None,
         placeholder="Select a theme ...",
     )
-    st.write("Votre sélection : ", theme)
+    if theme:
+        st.write(f"Votre sélection : {theme}")
+        selected_exo = f"SELECT * FROM memory_state WHERE theme = '{theme}'"
+    else:
+        selected_exo = f"SELECT * FROM memory_state"
 
-    exo = con.execute(f"SELECT * FROM memory_state WHERE theme = '{theme}'").df()
+    exo = (
+        con.execute(selected_exo)
+        .df()
+        .sort_values("last_reviewed")
+        .reset_index(drop=True)
+    )
     st.write(exo)
-
     exo_name = exo.loc[0, "exo_name"]
     with open(f"answers/{exo_name}.sql", "r") as f:
         answer = f.read()
@@ -103,4 +121,4 @@ with tab2:
 #     st.dataframe(solution_df)
 #
 with tab3:
-    st.write(answer)
+    st.text(answer)
